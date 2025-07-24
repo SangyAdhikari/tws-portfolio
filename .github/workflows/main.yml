@@ -20,17 +20,15 @@ jobs:
     steps:
       # Step 1 - Checkout Code
       - name: Checkout code
-        uses: actions/checkout@v1
-        
-        
+        uses: actions/checkout@v3
 
       # Step 2 - Configure AWS Credentials
-       - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-1
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
       # Step 3 - Log in to Amazon ECR
       - name: Login to Amazon ECR
@@ -50,12 +48,5 @@ jobs:
       # Step 6 - Push Docker image to ECR
       - name: Push Docker image
         run: |
-          docker push 123456789012.dkr.ecr.${AWS_REGION}.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push 382352119835.dkr.ecr.${AWS_REGION}.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
 
-      # Step 7 - Update Kubernetes deployment
-      - name: Update Kubernetes deployment
-        run: |
-          aws eks update-kubeconfig --name $CLUSTER_NAME --region $AWS_REGION
-          kubectl set image deployment/$DEPLOYMENT_NAME \
-            $CONTAINER_NAME=123456789012.dkr.ecr.${AWS_REGION}.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
-          kubectl rollout status deployment/$DEPLOYMENT_NAME
